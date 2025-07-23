@@ -1,0 +1,76 @@
+---
+title: Get Started
+description: Learn how to install and set up a LightTs project.
+---
+
+Get up and running with **LightTs**, a lightweight Node.js framework, in just a few steps. This guide walks you through installing the CLI, initializing a project, and generating your first components.
+
+import { Steps } from '@astrojs/starlight/components';
+
+<Steps>
+
+1. **Installation**
+
+    Install the LightTs CLI globally to streamline project setup and management:
+
+    ```bash
+    npm install -g lightts
+    ```
+
+    Alternatively, use `npx` to run the CLI without global installation:
+
+    ```bash
+    npx lightts
+    ```
+
+    The CLI supports both `lightts` and `lts` commands. For example:
+
+    ```bash
+    lts init
+    ```
+
+2. **Initialize a Project**
+
+    Create a new LightTs project with the `init` command:
+
+    ```bash
+    lts init
+    ```
+
+    The CLI will prompt you to configure your project:
+
+    - **Project Name**: Enter a name (e.g., `my-api`).
+    - **File Naming Style**: Choose between Angular-style (`auth.service.ts`) or regular (`auth.ts`) naming conventions.
+    - **Features**: Select optional features like JWT authentication, CORS, validation, or database integration.
+    - **Database Options**: If database support is selected, choose from PostgreSQL, MySQL, MariaDB, or MongoDB, and configure migrations, seeders, or dummy data.
+    - **Code Quality Tools**: Optionally set up ESLint, Prettier, and Husky for code consistency.
+    - **Package Manager**: Choose npm, Yarn, or pnpm.
+
+    This generates a project structure with all necessary files and configurations.
+
+3. **Generate Components**
+
+    Use the `generate` (or `g`) command to create controllers, services, validators, or resources:
+
+    ```bash
+    lts generate controller user
+    lts g service auth
+    lts g validate user
+    lts g resource product
+    ```
+
+    These commands create modular, reusable components that follow LightTs conventions.
+
+4. **Run Your Project**
+
+    Navigate to your project directory and start the development server:
+
+    ```bash
+    cd my-api
+    npm run dev
+    ```
+
+    Your API will be available at `http://localhost:8000` (or a custom port if configured).
+</Steps>
+
+Done! Your LightTs API is live. Check the [CLI](/cli/) docs for more commands.

@@ -1,0 +1,172 @@
+---
+title: Features
+description: Explore the key features of LightTs for building Node.js APIs.
+---
+
+import { Card, Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+**LightTs** is your toolkit for crafting APIs with speed, clarity, and control. Built on standard Node.js libraries, it blends Express’s simplicity with NestJS-inspired structure. Explore the features below to see why it’s the perfect fit for your next project.
+
+<Card title="CLI Tooling" icon="seti:powershell">
+  The `lts` CLI makes API development a breeze. Initialize projects, generate components, or add features like JWT with simple commands.
+
+  <Steps>
+    1. **Init**: `lts init my-api`
+    2. **Generate**: `lts g controller user`
+    3. **Add**: `lts add jwt`
+  </Steps>
+
+  <LinkCard title="Master the CLI" href="/cli/" description="Learn all `lts` commands." />
+</Card>
+
+<Card title="Node.js & Express" icon="node">
+  Powered by `express` and standard libraries like `jsonwebtoken` and `joi`. Get familiar routing and transparent, editable code with no hidden magic.
+</Card>
+
+<Card title="Flexible Naming" icon="seti:config">
+  Choose **Angular-style** (`user.service.ts`) or **standard** (`user.ts`) naming during `lts init` for a consistent codebase.
+</Card>
+
+<Card title="Responses & Errors" icon="seti:info">
+  Use `DataResponse` and `MessageResponse` for clean outputs, plus error classes like `BadRequestError` for consistent handling.
+
+  <Tabs>
+    <TabItem label="Response">
+      ```typescript
+      // src/modules/user/user.service.ts
+      import { DataResponse } from '@/core/responses/data.response';
+      import { Request, Response } from 'express';
+
+      export default {
+          get: async (req: Request, res: Response) => {
+              const users = [{ id: 1, name: 'John Doe' }];
+
+              return new DataResponse(res, {
+                  data: users,
+                  message: 'Users fetched like a pro!',
+                  statusCode: 200
+              });
+          }
+      };
+
+      ```
+    </TabItem>
+    <TabItem label="Error">
+      ```typescript
+      // src/modules/user/user.service.ts
+      import { BadRequestError } from '@/core/errors/bad-request.error';
+      import { Request, Response } from 'express';
+
+      export class UserController {
+        createUser(req: Request, res: Response) {
+          if (!req.body.name) throw new BadRequestError('Name is required');
+          // Create user logic
+        }
+      }
+      ```
+    </TabItem>
+  </Tabs>
+</Card>
+
+  <Card title="Feature Integration" icon="seti:json">
+    Add JWT, validation, CORS, or TypeORM with one command. Explore options in [Add Features](/cli/add/).
+
+    <Tabs>
+      <TabItem label="JWT">
+        ```bash
+        lts add jwt
+        ```
+        ```typescript
+        // src/user.controller.ts
+        import express from 'express';
+        import services from './user.service';
+        import { validateToken } from '@/middleware/auth.middleware';
+
+        const router = express.Router();
+
+        router.post('/', validateToken(['admin']), services.create);
+        ```
+      </TabItem>
+    </Tabs>
+  </Card>
+
+  <Card title="Database Support" icon="seti:db">
+    Seamlessly integrate `TypeORM` for PostgreSQL, MySQL, MariaDB, or MongoDB, with migrations and seeders.
+
+    ```typescript
+    // src/database/entities/user.entity.ts
+    import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+    @Entity()
+    export class User {
+      @PrimaryGeneratedColumn()
+      id: number;
+
+      @Column()
+      name: string;
+
+      @Column()
+      email: string;
+    }
+    ```
+  </Card>
+
+  <Card title="Code Quality" icon="seti:puppet">
+    Optional setup for ESLint, Prettier, and Husky during `lts init` to keep your code clean and consistent.
+  </Card>
+
+  <Card title="Modular Structure" icon="seti:julia">
+    Organize code into modules with controllers, services, and validators for scalability.
+
+    <Tabs>
+      
+      <TabItem label="Service">
+        ```typescript
+        // src/modules/user/user.service.ts
+        import { DataResponse } from '@/core/responses/data.response';
+        import { Request, Response } from 'express';
+
+        export default {
+            get: async (req: Request, res: Response) => {
+                const users = [{ id: req.params.id, name: 'John Doe' }];
+
+                return new DataResponse(res, {
+                    data: users,
+                    message: 'Users fetched like a pro!',
+                    statusCode: 200
+                });
+            }
+        }
+        ```
+      </TabItem>
+      <TabItem label="Schema">
+        ```typescript
+        // src/modules/user/user.schema.ts
+        import Joi from "joi";
+
+        export default {
+            get: Joi.object().keys({
+                id: Joi.number().required()
+            })
+        };
+        ```
+      </TabItem>
+      <TabItem label="Controller">
+        ```typescript
+        // src/modules/user/user.controller.ts
+        import express from 'express';
+        import services from './user.service';
+        import schema from './user.schema';
+        import validate from '@/middleware/validator.middleware';
+
+        const router = express.Router();
+
+        router.get('/{id}', validate(schema.get, 'params'), services.get);
+
+        export default router;
+        ```
+      </TabItem>
+    </Tabs>
+  </Card>
+
+<LinkCard title="See LightTs in Action" href="/examples/" description="Try practical examples to get started." />
