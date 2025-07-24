@@ -16,19 +16,28 @@ export default defineConfig({
             sidebar: [
                 {
                     label: 'Start Here',
-                    items: ['what-is-lightts', 'why-lightts', 'get-started', 'features']
+                    items: ['what-is-lightts', 'why-lightts', 'get-started', 'toolkit']
                 },
                 {
                     label: 'CLI',
+                    items: ['cli', 'cli/generate', 'cli/add']
+                },
+                {
+                    label: 'Core',
+                    items: ['core', 'core/responses', 'core/errors']
+                },
+                {
+                    label: 'Features',
                     items: [
-                        'cli',
-                        'cli/generate',
-
-                        {
-                            label: 'Add Command',
-                            items: ['cli/add', 'cli/add/jwt', 'cli/add/validation']
-                        }
+                        'features/jwt',
+                        'features/validation',
+                        'features/cors',
+                        'features/database'
                     ]
+                },
+                {
+                    label: 'Example',
+                    items: ['examples/user-management']
                 }
             ],
             plugins: [starlightThemeRapide()]

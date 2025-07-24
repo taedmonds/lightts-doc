@@ -3,6 +3,8 @@ title: Overview
 description: Learn about the LightTs CLI and its capabilities.
 ---
 
+import { FileTree } from '@astrojs/starlight/components';
+
 The **LightTs CLI** is the core tool for managing LightTs projects, providing an intuitive interface for project initialization, component generation, and feature integration. Inspired by NestJS but focused on generating native Node.js code, the CLI ensures simplicity and flexibility.
 
 ## Key Commands
@@ -23,3 +25,73 @@ To see all available commands and options, run:
 ```bash
 lts --help
 ```
+
+## Initialize a Project
+
+Run `lts init` to set up a new LightTs project with a clean, modular structure. The CLI’s interactive prompts guide you through selecting options like file naming style and feature inclusions, ensuring a tailored setup.
+
+### Project Structure
+
+The `lts init` command creates the following structure, organized for scalability and clarity:
+
+<FileTree>
+- src/
+  - core/
+    - cors.core.ts
+    - logger.core.ts
+    - errors/
+      - bad-request.error.ts
+      - conflict.error.ts
+      - forbidden.error.ts
+      - handler.error.ts
+      - index.ts
+      - not-found.error.ts
+      - server-error.error.ts
+      - unauthorized.error.ts
+    - responses/
+      - data.response.ts
+      - index.ts
+      - message.response.ts
+  - database/
+    - index.ts
+    - entities/
+    - migrations/
+    - dummy/
+      - index.ts
+      - scripts/
+    - seeders/
+      - index.ts
+      - scripts/
+  - middleware/
+    - auth.middleware.ts
+    - validator.middleware.ts
+  - modules/
+    - hello/
+      - hello.controller.ts
+      - hello.schema.ts
+      - hello.service.ts
+    - user/
+      - user.controller.ts
+      - user.schema.ts
+      - user.service.ts
+  - types/
+    - express.d.ts
+  - routes.ts
+  - config.ts
+- tsconfig.json
+- .env
+- .prettierrc
+- .prettierignore
+- .gitignore
+- eslint.config.js
+- index.ts
+- package.json
+- ReadMe.md
+</FileTree>
+
+### Naming Conventions
+
+LightTs follows consistent naming conventions to keep your codebase clean:
+
+- **Files & Folders**: kebab-case (e.g., `user.controller.ts`, `core/errors/`).
+- **Functions & Variables**: camelCase (e.g., `getUsers`, `userRepo`).

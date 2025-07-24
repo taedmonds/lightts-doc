@@ -1,0 +1,292 @@
+---
+title: Database
+description: Learn how to add TypeORM database support in LightTs.
+---
+
+import { Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `lts add database` command in **LightTs** hooks up TypeORM for PostgreSQL, complete with migrations, seeders, and dummy data support. It generates clean, customizable database configurations using standard Node.js libraries, keeping your data layer flexible and transparent.
+
+## Add Database Support
+
+<Steps>
+1. **Run the Command**
+
+   ```bash
+   lts add database
+   ```
+
+2. **Select Database**
+
+   Choose PostgreSQL (other databases like MySQL, MariaDB, or MongoDB may be supported in future updates).
+
+3. **Configure Options**
+
+   Enable migrations, seeders, or dummy data as prompted.
+
+4. **Set Up Config**
+
+   Update `.env` with your database credentials.
+</Steps>
+
+<Tabs>
+  <TabItem label="Data Source">
+    ```typescript
+    // src/database/index.ts
+    import { db } from '@/config';
+    import path from 'path';
+    import { DataSource } from 'typeorm';
+    import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+    export const AppDataSource = new DataSource({
+      type: 'postgres',
+      host: db.host,
+      port: db.port,
+      username: db.user,
+      password: db.pwd,
+      database: db.name,
+      synchronize: false,
+      logging: false,
+      entities: [path.join(__dirname, '/entities/**/*.entity.{ts,js}')],
+      migrations: [path.join(__dirname, '/migrations/**/*.{ts,js}')],
+      subscribers: [],
+      migrationsTableName: 'migrations',
+      namingStrategy: new SnakeNamingStrategy(),
+    });
+
+    export async function createConnection() {
+      if (!AppDataSource.isInitialized) { try { await AppDataSource.initialize(); } catch (error) { throw error; } }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Config">
+    ```typescript
+    // src/config.ts
+    export const { db } = {
+        db: {
+            user: process.env.DB_USER,
+            name: process.env.DB_NAME,
+            pwd: process.env.DB_PWD,
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432
+        },
+    };
+    ```
+  </TabItem>
+  <TabItem label="Connection">
+    ```typescript
+    // index.ts
+    ...
+    import { createConnection } from '@/database';
+    import { log } from '@/core/logger.core';
+
+    ...
+    createConnection()
+      .then(() => log.info('Connected to database'))
+      .catch((error) => {
+        log.error('Error connecting to database:');
+        log.error(error);
+      });
+
+    ...
+    ```
+  </TabItem>
+</Tabs>
+
+## Example Entity
+
+```typescript
+// src/database/entities/user.entity.ts
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  password: string;
+}
+```
+
+## Migrations, Seeders, and Dummy Data
+
+<Steps>
+1. **Create Migration**
+
+   Generate a migration script to manage schema changes:
+
+   ```bash
+   npm run typeorm migration:create src/database/migrations/sample.ts
+   ```
+
+   Example migration:
+
+   ```typescript
+   // src/database/migrations/sample.ts
+   import { MigrationInterface, QueryRunner } from 'typeorm';
+
+   export class SampleMigration implements MigrationInterface {
+     async up(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`
+         CREATE TABLE user (
+           id SERIAL PRIMARY KEY,
+           name VARCHAR NOT NULL,
+           email VARCHAR NOT NULL,
+           password VARCHAR NOT NULL
+         )
+       `);
+     }
+
+     async down(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`DROP TABLE user`);
+     }
+   }
+   ```
+
+2. **Create Seeder**
+
+   Generate a seeder script for initial data:
+
+   ```bash
+   npm run typeorm migration:create src/database/seeders/scripts/sample.ts
+   ```
+
+   Example seeder:
+
+   ```typescript
+   // src/database/seeders/scripts/sample.ts
+   import { MigrationInterface, QueryRunner } from 'typeorm';
+
+   export class SampleSeeder implements MigrationInterface {
+     async up(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`
+         INSERT INTO user (name, email, password)
+         VALUES ('Admin', 'admin@example.com', 'secure123')
+       `);
+     }
+
+     async down(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`DELETE FROM user WHERE email = 'admin@example.com'`);
+     }
+   }
+   ```
+
+3. **Create Dummy Data**
+
+   Generate a dummy data script for testing:
+
+   ```bash
+   npm run typeorm migration:create src/database/dummy/scripts/sample.ts
+   ```
+
+   Example dummy data:
+
+   ```typescript
+   // src/database/dummy/scripts/sample.ts
+   import { MigrationInterface, QueryRunner } from 'typeorm';
+
+   export class SampleDummy implements MigrationInterface {
+     async up(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`
+         INSERT INTO user (name, email, password)
+         VALUES
+           ('Test User', 'test@example.com', 'test123'),
+           ('Demo User', 'demo@example.com', 'demo123')
+       `);
+     }
+
+     async down(queryRunner: QueryRunner): Promise<void> {
+       await queryRunner.query(`DELETE FROM user WHERE email IN ('test@example.com', 'demo@example.com')`);
+     }
+   }
+   ```
+
+4. **Run Scripts**
+
+   Apply migrations, seeders, or dummy data:
+
+   <Tabs>
+     <TabItem label="Development">
+       ```bash
+       npm run migrate
+       npm run seed
+       npm run dummy
+       ```
+     </TabItem>
+     <TabItem label="Production">
+       ```bash
+       npm run build:migrate
+       npm run build:seed
+       ```
+     </TabItem>
+   </Tabs>
+</Steps>
+
+<Tabs>
+  <TabItem label="Seeders Data Source">
+    ```typescript
+    // src/database/seeders/index.ts
+    import { db } from '@/config';
+    import path from 'path';
+    import { DataSource } from 'typeorm';
+    import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+    export const seedsDatasource = new DataSource({
+      type: 'postgres',
+      host: db.host,
+      port: db.port,
+      username: db.user,
+      password: db.pwd,
+      database: db.name,
+      synchronize: false,
+      logging: false,
+      entities: [path.join(__dirname, '../entities/**/*.entity.{ts,js}')],
+      migrations: [path.join(__dirname, '/scripts/**/*.{ts,js}')],
+      subscribers: [],
+      migrationsTableName: 'migration_seeders',
+      namingStrategy: new SnakeNamingStrategy(),
+    });
+    ```
+  </TabItem>
+  <TabItem label="Dummy Data Source">
+    ```typescript
+    // src/database/dummy/index.ts
+    import { db } from '@/config';
+    import path from 'path';
+    import { DataSource } from 'typeorm';
+    import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+    export const dummyDatasource = new DataSource({
+      type: 'postgres',
+      host: db.host,
+      port: db.port,
+      username: db.user,
+      password: db.pwd,
+      database: db.name,
+      synchronize: false,
+      logging: false,
+      entities: [path.join(__dirname, '../entities/**/*.entity.{ts,js}')],
+      migrations: [path.join(__dirname, '/scripts/**/*.{ts,js}')],
+      subscribers: [],
+      migrationsTableName: 'migration_dummy',
+      namingStrategy: new SnakeNamingStrategy(),
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+## Notes
+
+- Set `synchronize: false` in production to prevent schema changes.
+- Customize entities, migrations, seeders, and dummy data in `src/database/`.
+- Use `npm run typeorm migration:create` to generate new scripts for migrations, seeders, or dummy data.
+- Run scripts with `npm run migrate`, `npm run seed`, or `npm run dummy` for development, and `npm run build:migrate` or `npm run build:seed` for production.
+
+<LinkCard title="See Database in Action" href="/examples/user-management/" description="Try a database-backed user management API." />

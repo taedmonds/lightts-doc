@@ -37,24 +37,22 @@ The `validation` feature in **LightTs** equips your API with robust input valida
     import { NextFunction, Request, Response } from 'express';
     import Joi from 'joi';
 
-    export const { validate } = {
-        validate: (schema: Joi.ObjectSchema, content: 'body' | 'params' | 'query' = 'body') => {
-            return async (req: Request, res: Response, next: NextFunction) => {
-                const data =
-                    content == 'body' ? req.body : content == 'params' ? req.params : req.query;
-                const valid = schema.validate(data);
+    const validate = (schema: Joi.ObjectSchema, content: 'body' | 'params' | 'query' = 'body') => {
+        return async (req: Request, res: Response, next: NextFunction) => {
+            const data = content == 'body' ? req.body : content == 'params' ? req.params : req.query;
+            const valid = schema.validate(data);
 
-                if (valid.error) {
-                    var error = valid.error.details[0].message.replace(/"/g, '');
+            if (valid.error) {
+                var error = valid.error.details[0].message.replace(/"/g, '');
 
-                    throw new BadRequestError(error);
-                }
+                throw new BadRequestError(error);
+            }
 
-                return next();
-            };
-        }
+            return next();
+        };
     };
 
+    export default validate;
     ```
   </TabItem>
   <TabItem label="Schema">
@@ -74,7 +72,7 @@ The `validation` feature in **LightTs** equips your API with robust input valida
     ```typescript
     // src/modules/user/user.controller.ts
     import { Router } from 'express';
-    import { validate } from '@/middleware/validator.middleware';
+    import validate from '@/middleware/validator.middleware';
     import validationSchema from '@/modules/user/user.schema';
     import service from './user.service';
 

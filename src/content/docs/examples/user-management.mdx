@@ -1,0 +1,329 @@
+---
+title: User Management API
+description: Build a user management API with LightTs, including authentication and database support.
+---
+
+import { Tabs, TabItem, Steps, LinkCard, FileTree } from '@astrojs/starlight/components';
+
+This example walks you through building a **LightTs** API to manage users, complete with a controller, service, validator, JWT authentication, CORS, and PostgreSQL integration. It’s a practical way to see how LightTs’s modular structure and CLI streamline development.
+
+## Setup
+
+<Steps>
+
+1. **Initialize Project**
+
+   ```bash
+   lts init user-api
+   ```
+
+2. **Add Features**
+
+   ```bash
+   lts add database
+   lts add validation
+   lts add jwt
+   lts add cors
+   ```
+
+   Select PostgreSQL for the database and enable migrations.
+
+3. **Generate User Module**
+
+   ```bash
+   lts g resource user
+   ```
+
+   This creates `src/modules/user/` with `user.controller.ts`, `user.service.ts`, and `user.schema.ts`.
+
+4. **Configure Database**
+
+   Set up the database connection and entity.
+
+5. **Define Routes**
+
+   Create secure, validated routes for user operations.
+
+</Steps>
+
+### Project Structure
+
+<FileTree>
+  - user-api/
+   - src/
+     - core/
+       - cors.core.ts
+       - logger.core.ts
+     - database/
+       - entities/
+         - user.entity.ts
+       - index.ts
+     - modules/
+       - user/
+         - user.controller.ts
+         - user.service.ts
+         - user.schema.ts
+     - middleware/
+       - auth.middleware.ts 
+     - config.ts
+     - routes.ts
+  - index.ts
+</FileTree>
+
+### Code Examples
+
+<Tabs>
+  <TabItem label="Config">
+    ```typescript
+    // src/config.ts
+    export const { db, auth } = {
+        db: {
+            user: process.env.DB_USER,
+            name: process.env.DB_NAME,
+            pwd: process.env.DB_PWD,
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432
+        },
+        auth: {
+            salt: 10,
+            jwt: {
+                access: {
+                    secret: process.env.ACCESS_JWT_SECRET,
+                    expiresIn: '15m'
+                },
+                refresh: {
+                    secret: process.env.REFRESH_JWT_SECRET,
+                    expiresIn: '30d'
+                }
+            }
+        },
+    };
+    ```
+  </TabItem>
+  <TabItem label="Source">
+    ```typescript
+    // src/database/index.ts
+    import { db } from '@/config';
+    import path from 'path';
+    import { DataSource } from 'typeorm';
+    import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+
+    export const AppDataSource = new DataSource({
+      type: 'postgres',
+      host: db.host,
+      port: db.port,
+      username: db.user,
+      password: db.pwd,
+      database: db.name,
+      synchronize: false,
+      logging: false,
+      entities: [path.join(__dirname, '/entities/**/*.entity.{ts,js}')],
+      migrations: [path.join(__dirname, '/migrations/**/*.{ts,js}')],
+      subscribers: [],
+      migrationsTableName: 'migrations',
+      namingStrategy: new SnakeNamingStrategy(),
+    });
+
+    export async function createConnection() {
+        if (!AppDataSource.isInitialized) { try { await AppDataSource.initialize(); } catch (error) { throw error; } }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Entity">
+    ```typescript
+    // src/database/entities/user.entity.ts
+    import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+    @Entity()
+    export class User {
+      @PrimaryGeneratedColumn()
+      id: number;
+
+      @Column()
+      name: string;
+
+      @Column()
+      email: string;
+
+      @Column()
+      password: string;
+    }
+    ```
+  </TabItem>
+  <TabItem label="Service">
+    ```typescript
+    // src/modules/user/user.service.ts
+    import { BadRequestError } from '@/core/errors/bad-request.error';
+    import { DataResponse } from '@/core/responses/data.response';
+    import { MessageResponse } from '@/core/responses/message.response';
+    import { Request, Response } from 'express';
+    import { AppDataSource } from '@/database';
+    import { User } from '@/database/entities/user.entity';
+
+    export default {
+      get: async (req: Request, res: Response) => {
+        const userRepo = AppDataSource.getRepository(User);
+        const users = await userRepo.find();
+
+        return new DataResponse(res, {
+          data: users,
+          message: 'Users fetched like a pro!',
+          statusCode: 200,
+        });
+      },
+      create: async (req: Request, res: Response) => {
+        const { name, email, password } = req.body;
+
+        const userRepo = AppDataSource.getRepository(User);
+        const existing = await userRepo.findOneBy({ email });
+
+        if (existing) throw new BadRequestError('Email already exists!', { field: 'email' });
+
+        const user = userRepo.create({ name, email, password });
+        await userRepo.save(user);
+
+        return new MessageResponse(res, { message: 'User created, high five!', statusCode: 201 });
+      }
+    };
+    ```
+  </TabItem>
+  <TabItem label="Validator">
+    ```typescript
+    // src/modules/user/user.schema.ts
+    import Joi from 'joi';
+
+    export default {
+      create: Joi.object().keys({
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().min(6).required(),
+      }),
+    };
+    ```
+  </TabItem>
+  <TabItem label="Controller">
+    ```typescript
+    // src/modules/user/user.service.ts
+    import express from 'express';
+    import services from './user.service';
+    import schema from './user.schema';
+    import validate from '@/middleware/validator.middleware';
+    import { validateToken } from '@/middleware/auth.middleware';
+
+    const router = express.Router();
+
+    router.get('/', services.get);
+    router.post('/', validate(schema.create), validateToken(['admin']), services.create);
+
+    export default router;
+    ```
+  </TabItem>
+  <TabItem label="Routes">
+    ```typescript
+    // src/routes.ts
+    import express from 'express';
+    import helloController from '@/modules/hello/hello.controller';
+    import userController from "@/modules/user/user.controller";
+
+    const router = express.Router();
+
+    router.use('/user', userController);
+
+    export default router;
+    ```
+  </TabItem>
+  <TabItem label="Server">
+    ```typescript
+    // index.ts
+    import express from 'express';
+    import { HttpError } from '@/core/errors';
+    import { api } from '@/config';
+    import log from '@/core/logger.core';
+    import routes from '@/routes';
+    import cors from 'cors';
+    import { checkCorsOrigin } from '@/core/cors.core';
+    import { createConnection } from '@/database';
+    import 'tsconfig-paths/register';
+
+    const app = express();
+
+    // express configurations
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+
+    // cors
+    app.use(
+        cors({
+            origin: checkCorsOrigin,
+            credentials: true
+        })
+    );
+
+    // database connection
+    createConnection()
+        .then(() => {
+            log.info('Connected to database');
+        })
+        .catch((error) => {
+            log.error('Error connecting to database:');
+            log.error(error);
+        });
+
+    // http routes
+    app.use(`/api/${api.version}`, routes);
+
+    // http error class handler
+    app.use(HttpError.middleware);
+
+    app.listen(api.port, () => {
+        log.info(`Listening on port: ${api.port}`);
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+## Run the API
+
+<Steps>
+1. **Set Environment Variables**
+
+   Create a `.env` file:
+
+   ```bash
+   # database
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USER=postgres
+   DB_PASSWORD=password
+   DB_NAME=my_api_db
+
+   # jwt
+   ACCESS_JWT_SECRET=your-secret
+   ```
+
+2. **Run Migrations**
+
+   ```bash
+   npm run migrate
+   ```
+
+3. **Start the Server**
+
+   ```bash
+   npm run dev
+   ```
+
+4. **Test the API**
+
+   Use Postman or curl to test:
+   - `POST /api/users` with a valid JWT and body: `{ "name": "John Doe", "email": "john@example.com", "password": "secure123" }`
+   - `GET /api/users` with a valid JWT
+</Steps>
+
+## Notes
+
+- **Customization**: Edit files in `src/modules/user/` and `src/database/` to suit your needs.
+- **Security**: Use a secure `ACCESS_JWT_SECRET` and set `synchronize: false` in production.
+- **Scalability**: Add more entities or services to expand the API.
+
+<LinkCard title="Add More Features" href="/cli/add/" description="Integrate additional features like validation or CORS." />

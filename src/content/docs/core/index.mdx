@@ -1,0 +1,45 @@
+---
+title: Overview
+description: Learn about LightTs's built-in response and error handling tools.
+---
+
+import { Card, LinkCard, FileTree } from '@astrojs/starlight/components';
+
+LightTs includes **built-in response and error handling classes** as part of every project initialized with `lts init`. These core tools, built with native Node.js and Express, standardize API responses and errors, keeping your code clean and aligned with LightTs’s simplicity, like other utilities such as CORS and logging.
+
+## Included Files
+
+These classes are included in `src/core/` when you create a LightTs project, using kebab-case for file names:
+
+<FileTree>
+- src/
+  - core/
+    - responses/
+      - data.response.ts
+      - message.response.ts
+      - index.ts
+    - errors/
+      - bad-request.error.ts
+      - conflict.error.ts
+      - forbidden.error.ts
+      - handler.error.ts
+      - index.ts
+      - not-found.error.ts
+      - server-error.error.ts
+      - unauthorized.error.ts
+</FileTree>
+
+## Available Tools
+
+<div class="card-container">
+  <Card title="Response Classes" icon="seti:typescript">
+    Use `HttpResponse`, `DataResponse`, and `MessageResponse` for consistent API success responses.
+
+    <LinkCard title="Explore Response Classes" href="/core/responses/" description="Standardize success responses with built-in classes." />
+  </Card>
+  <Card title="Error Classes" icon="seti:typescript">
+    Use `HttpError` and specific error classes like `ConflictError` for robust error handling.
+
+    <LinkCard title="Explore Error Classes" href="/core/errors/" description="Handle errors with built-in classes and middleware." />
+  </Card>
+</div>

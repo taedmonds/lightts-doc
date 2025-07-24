@@ -1,0 +1,84 @@
+---
+title: CORS
+description: Learn how to add CORS support in LightTs.
+---
+
+import { Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `cors` feature in **LightTs** enables Cross-Origin Resource Sharing (CORS), letting your API handle requests from web clients across domains.
+
+## Add CORS Support
+
+<Steps>
+
+1. **Run the Command**
+
+   ```bash
+   lts add cors
+   ```
+
+2. **Apply Middleware**
+
+   Use the generated middleware in `index.ts`.
+
+</Steps>
+
+<Tabs>
+  <TabItem label="Core">
+    ```typescript
+    // src/core/cors.core.ts
+    import { app } from '@/config';
+
+    const originsList = [app.url];
+
+    ...
+
+    export function checkCorsOrigin(
+        origin: string | undefined,
+        callback: (error: any, state: boolean) => void
+    ) {
+        if (!origin) return callback(null, true); // for * origins
+
+        const origins = Object.values(originsList);
+        let result = origins.find((url) =>
+            typeof url === 'string' ? extractHostname(url) == extractHostname(origin) : null
+        );
+
+        if (result || !origin) {
+            callback(null, true);
+        } else {
+            callback(
+                `The CORS policy for this site does not allow access from the specified Origin.(${origin})`,
+                false
+            );
+        }
+    }
+    ```
+  </TabItem>
+  <TabItem label="Usage">
+    ```typescript
+    // index.ts
+    ...
+    import { corsMiddleware } from '@/core/cors.core';
+
+    ...
+    
+    // cors
+    app.use(
+        cors({
+            origin: checkCorsOrigin,
+            credentials: true
+        })
+    );
+
+    ...
+    ```
+  </TabItem>
+</Tabs>
+
+## Notes
+
+- Customize `origin` to restrict domains (e.g., `['http://example.com']`).
+- Adjust `methods` and `allowedHeaders` as needed.
+
+<LinkCard title="See CORS in Action" href="/examples/" description="Try a CORS-enabled route example." />
