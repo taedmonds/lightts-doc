@@ -1,0 +1,121 @@
+---
+title: Generate Command
+description: Learn how to use the LightTs generate command to create components.
+---
+
+import { Card, CardGrid, Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `lts generate` (or `g`) command is your tool for creating modular components like controllers, services, validators, or resources in **LightTs**. It generates clean, editable Node.js code tailored to your naming style (Angular or regular), saving you time while keeping your project organized.
+
+## Usage
+
+```bash
+lts generate <type> <name>
+lts g <type> <name>
+```
+
+<Steps>
+1. **Choose a Type**: Pick `controller`, `service`, `validate`, or `resource`.
+2. **Name It**: Specify a name (e.g., `user`, `product`).
+3. **Generate**: Run `lts g <type> <name>` to create files in `src/modules/<name>/`.
+</Steps>
+
+<LinkCard title="Explore All CLI Commands" href="/cli/" description="Discover more ways to use the `lts` CLI." />
+
+## Component Types
+
+  <Card title="Controller" icon="seti:puppet">
+    Handles HTTP requests with clean, Express-based routing.
+
+    ```bash
+    lts g controller user
+    ```
+
+    <Tabs>
+      <TabItem label="Controller">
+        ```typescript
+        // src/modules/user/user.controller.ts
+        import express from 'express';
+        <!-- import services from './user.service'; -->
+
+        const router = express.Router();
+
+        router.get('/', services.hello);
+
+        export default router;
+        ```
+      </TabItem>
+      <TabItem label="Route">
+        ```typescript
+        // src/routes.ts
+        import { Router } from 'express';
+        import userController from "@/modules/user/user.controller";
+
+        const router = Router();
+
+        router.use('/user', userController);
+        ```
+      </TabItem>
+    </Tabs>
+  </Card>
+
+  <Card title="Service" icon="setting">
+    Manages business logic, keeping controllers lean.
+
+    ```bash
+    lts g service user
+    ```
+
+    ```typescript
+    // src/modules/user/user.service.ts
+    import { MessageResponse } from '@/core/responses/message.response';
+    import { Request, Response } from 'express';
+
+    export default {
+        hello: async (req: Request, res: Response) => {
+            new MessageResponse(res, { message: 'Hello LightTs!' });
+        }
+    };
+    ```
+  </Card>
+
+  <Card title="Validator" icon="seti:json">
+    Creates Joi schemas for robust input validation.
+
+    ```bash
+    lts g validate user
+    ```
+
+    ```typescript
+    // src/modules/user/user.schema.ts
+    import Joi from 'joi';
+
+    export default {
+      create: Joi.object().keys({
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+      }),
+    };
+    ```
+  </Card>
+
+  <Card title="Resource" icon="seti:folder">
+    Generates a full module: controller, service, and validator.
+
+    ```bash
+    lts g resource product
+    ```
+
+    Creates `src/modules/product/` with:
+    - `product.controller.ts`
+    - `product.service.ts`
+    - `product.schema.ts`
+  </Card>
+
+## Notes
+
+- **Naming**: Files follow your `lts init` choice (Angular-style: `user.service.ts` or regular: `user.ts`).
+- **Modularity**: Components are organized in `src/modules/<name>/` for scalability.
+- **Customization**: Generated code uses standard Node.js libraries, ready for your tweaks.
+
+<LinkCard title="Add Features" href="/cli/add/" description="Extend your project with JWT, validation, and more." />

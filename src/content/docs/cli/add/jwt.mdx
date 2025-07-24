@@ -1,0 +1,133 @@
+---
+title: JWT
+description: Learn how to add and use JWT authentication in LightTs.
+---
+
+import { Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `jwt` feature in **LightTs** locks down your API with JSON Web Token (JWT) authentication using `jsonwebtoken`. It generates a customizable `auth.ts` file, letting you secure routes and restrict access by roles with ease.
+
+## Add JWT Support
+
+<Steps>
+
+1. **Run the Command**
+
+   ```bash
+   lts add jwt
+   ```
+
+2. **Check Output**
+
+   Generates `src/middleware/auth.middleware.ts` and updates `src/config.ts` with JWT settings.
+
+3. **Secure Routes**
+
+    Use the `validateToken` middleware in your routes.
+
+</Steps>
+
+<Tabs>
+  <TabItem label="Middleware">
+    ```typescript
+    // src/middleware/auth.middleware.ts
+    import { auth } from '@/config';
+    import { NextFunction, Request, Response } from 'express';
+    import jwt from 'jsonwebtoken';
+
+    export const { validateToken } = {
+        validateToken: (roles?: IAuthUserRole[]) => {
+            return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+                const token = req.header('Authorization');
+
+                if (!token) {
+                    res.status(401).json({ message: 'access denied' });
+                    return;
+                }
+                const accessToken = token.split(' ')[1];
+
+                try {
+                    const decoded = jwt.verify(accessToken, auth.jwt.access.secret) as IAuthUser;
+                    req.user = decoded;
+
+                    if (!roles) return next();
+
+                    if (!roles?.includes(decoded.role)) {
+                        res.status(403).json({ message: 'permission denied' });
+                        return;
+                    }
+
+                    next();
+                } catch (error) {
+                    res.status(401).json({ message: 'invalid token' });
+                }
+            };
+        }
+    };
+    ```
+  </TabItem>
+  <TabItem label="Config">
+    ```typescript
+    // src/config.ts
+    export const auth = {
+      auth: {
+            salt: 10,
+            jwt: {
+                access: {
+                    secret: process.env.ACCESS_JWT_SECRET,
+                    expiresIn: '15m'
+                },
+                refresh: {
+                    secret: process.env.REFRESH_JWT_SECRET,
+                    expiresIn: '30d'
+                }
+            }
+        },
+    };
+    ```
+  </TabItem>
+  <TabItem label="Controller">
+    ```typescript
+    // src/models/user/user.controller.ts
+    import { Router } from 'express';
+    import { validateToken } from '@/middleware/auth.middleware';
+    import service from './user.service';
+
+    const router = Router();
+
+    router.get('/users', validateToken(['admin']), service.getUsers);
+    ```
+  </TabItem>
+</Tabs>
+
+## Role-Based Access
+
+Restrict routes to specific roles (e.g., `admin`) in the JWT payload:
+
+```json
+{
+  "id": 1,
+  "email": "user@example.com",
+  "role": "admin"
+}
+```
+
+Define roles in `src/types/express.d.ts`:
+
+```typescript
+export type IAuthUserRole = 'admin' | 'user' | string;
+
+export interface IAuthUser {
+  id: number;
+  email: string;
+  role: IAuthUserRole;
+}
+```
+
+## Notes
+
+- Set `ACCESS_JWT_SECRET` in your `.env` file for security.
+- Expects `Authorization: Bearer <token>` in headers.
+- Customize `auth.middleware.ts` for refresh tokens or advanced logic.
+
+<LinkCard title="See JWT in Action" href="/examples/" description="Try a JWT-protected route example." />

@@ -1,0 +1,114 @@
+---
+title: Validation
+description: Learn how to add and use Joi validation in LightTs.
+---
+
+import { Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `validation` feature in **LightTs** equips your API with robust input validation using `joi`. It generates a middleware and schemas to ensure your request data is rock-solid.
+
+## Add Validation Support
+
+<Steps>
+
+1. **Run the Command**
+
+   ```bash
+   lts add validation
+   ```
+
+2. **Generate a Schema**
+
+   ```bash
+   lts g validate user
+   ```
+
+3. **Apply to Routes**
+
+   Use the `validate` middleware in your routes.
+
+</Steps>
+
+<Tabs>
+  <TabItem label="Middleware">
+    ```typescript
+    // src/middleware/validator.middleware.ts
+    import { BadRequestError } from '@/core/errors/bad-request.error';
+    import { NextFunction, Request, Response } from 'express';
+    import Joi from 'joi';
+
+    export const { validate } = {
+        validate: (schema: Joi.ObjectSchema, content: 'body' | 'params' | 'query' = 'body') => {
+            return async (req: Request, res: Response, next: NextFunction) => {
+                const data =
+                    content == 'body' ? req.body : content == 'params' ? req.params : req.query;
+                const valid = schema.validate(data);
+
+                if (valid.error) {
+                    var error = valid.error.details[0].message.replace(/"/g, '');
+
+                    throw new BadRequestError(error);
+                }
+
+                return next();
+            };
+        }
+    };
+
+    ```
+  </TabItem>
+  <TabItem label="Schema">
+    ```typescript
+    // src/modules/user/user.schema.ts
+    import Joi from 'joi';
+
+    export default {
+      signin: Joi.object().keys({
+        email: Joi.string().email().required(),
+        password: Joi.string().required(),
+      }),
+    };
+    ```
+  </TabItem>
+  <TabItem label="Controller">
+    ```typescript
+    // src/modules/user/user.controller.ts
+    import { Router } from 'express';
+    import { validate } from '@/middleware/validator.middleware';
+    import validationSchema from '@/modules/user/user.schema';
+    import service from './user.service';
+
+    const router = Router();
+
+    router.post('/signin', validate(validationSchema.signin), service.signin);
+    ```
+  </TabItem>
+</Tabs>
+
+## Example Service
+
+```typescript
+// src/modules/user/user.service.ts
+import { DataResponse } from '@/core/responses/data.response';
+import { Request, Response } from 'express';
+
+export default {
+    get: async (req: Request, res: Response) => {
+        const { email } = req.body;
+
+        return new DataResponse(res, {
+          data: { id: 1, email },
+          message: 'Sign-in successful',
+          statusCode: 200,
+        });
+    },
+}
+```
+
+## Notes
+
+- Validates `req.body` against Joi schemas.
+- Customize schemas in `user.schema.ts` for advanced rules.
+- Errors return a 400 status with clear messages.
+
+<LinkCard title="See Validation in Action" href="/examples/" description="Try a validated sign-in route example." />

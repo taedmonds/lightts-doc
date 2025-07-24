@@ -1,0 +1,67 @@
+---
+title: Overview
+description: Learn how to use the LightTs add command to integrate features.
+---
+
+import { Card, CardGrid, Tabs, TabItem, Steps, LinkCard } from '@astrojs/starlight/components';
+
+The `lts add` (or `a`) command supercharges your **LightTs** project by integrating features like JWT authentication, validation, CORS, or database support. Each feature generates clean, customizable Node.js code using standard libraries for maximum flexibility.
+
+## Usage
+
+```bash
+lts add <feature>
+lts a <feature>
+```
+
+<Steps>
+1. **Choose a Feature**: Pick `jwt`, `validation`, `cors`, or `database`.
+2. **Run the Command**: Use `lts add <feature>` to generate the necessary files.
+3. **Customize**: Tweak the generated code to fit your needs.
+</Steps>
+
+## Supported Features
+
+<div class="card-container">
+  <Card title="JWT Authentication" icon="seti:lock">
+    Add token-based authentication with `jsonwebtoken`.
+
+    ```bash
+    lts add jwt
+    ```
+
+    <LinkCard title="Add JWT" href="/cli/add/jwt/" description="Secure routes with JWTs." />
+  </Card>
+
+  <Card title="Validation" icon="seti:json">
+    Enable schema-based validation with `joi`.
+
+    ```bash
+    lts add validation
+    ```
+
+    <LinkCard title="Add Validation" href="/cli/add/validation/" description="Validate inputs with Joi." />
+  </Card>
+
+  <Card title="CORS" icon="seti:globe">
+    Allow cross-origin requests for your API.
+
+    ```bash
+    lts add cors
+    ```
+
+    <LinkCard title="Add CORS" href="/cli/add/cors/" description="Enable CORS support." />
+  </Card>
+
+  <Card title="Database" icon="seti:database">
+    Integrate TypeORM for PostgreSQL, MySQL, MariaDB, or MongoDB.
+
+    ```bash
+    lts add database
+    ```
+
+    <LinkCard title="Add Database" href="/cli/add/database/" description="Connect to your database." />
+  </Card>
+</div>
+
+<LinkCard title="Explore Examples" href="/examples/" description="See how to combine features in your API." />

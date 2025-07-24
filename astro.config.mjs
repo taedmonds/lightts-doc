@@ -17,6 +17,18 @@ export default defineConfig({
                 {
                     label: 'Start Here',
                     items: ['what-is-lightts', 'why-lightts', 'get-started', 'features']
+                },
+                {
+                    label: 'CLI',
+                    items: [
+                        'cli',
+                        'cli/generate',
+
+                        {
+                            label: 'Add Command',
+                            items: ['cli/add', 'cli/add/jwt', 'cli/add/validation']
+                        }
+                    ]
                 }
             ],
             plugins: [starlightThemeRapide()]
