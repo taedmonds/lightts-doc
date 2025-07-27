@@ -5,7 +5,9 @@ import starlightThemeRapide from 'starlight-theme-rapide';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://lightts-doc.github.io',
+    output: 'static',
+    site: 'https://taedmonds.github.io/lightts-doc/',
+    base: 'https://taedmonds.github.io/lightts-doc/',
     integrations: [
         starlight({
             title: 'LightTs',
