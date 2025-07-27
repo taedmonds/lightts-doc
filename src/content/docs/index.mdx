@@ -8,7 +8,7 @@ hero:
         file: ../../assets/houston.webp
     actions:
         - text: Get Started
-          link: /get-started/
+          link: /lightts-doc/get-started/
           icon: right-arrow
         - text: Install via npm
           link: https://www.npmjs.com/package/lightts
@@ -17,22 +17,20 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
-const base = import.meta.env.BASE;
+export const base = import.meta.env.BASE_URL;
 
 ## Next Steps
 
 <CardGrid stagger>
     <Card title="Start Building" icon="rocket">
-        Follow the [Get Started]({base}/get-started/) guide to initialize your first LightTs project and
+        Follow the <a href={`${base}/get-started`}>Get Started</a> guide to initialize your first LightTs project and
         generate components.
     </Card>
     <Card title="Explore Features" icon="star">
-        Learn about LightTs's features like JWT, Joi validation, and TypeORM in the
-        [Features]({base}/features/) section.
+        Learn about LightTs's features like JWT, Joi validation, and TypeORM in the <a href={`${base}/toolkit`}>Features</a> section.
     </Card>
     <Card title="Use the CLI" icon="seti:powershell">
-        Discover how to use the `lts` CLI for generating components and adding features in the
-        [CLI]({base}/cli/) section.
+        Discover how to use the `lts` CLI for generating components and adding features in the <a href={`${base}/cli`}>CLI</a> section.
     </Card>
     <Card title="Contribute" icon="open-book">
         LightTs is open-source! Check out how to contribute on
