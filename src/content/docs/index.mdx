@@ -17,21 +17,22 @@ hero:
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
+const base = import.meta.env.BASE;
 
 ## Next Steps
 
 <CardGrid stagger>
     <Card title="Start Building" icon="rocket">
-        Follow the [Get Started](/get-started/) guide to initialize your first LightTs project and
+        Follow the [Get Started]({base}/get-started/) guide to initialize your first LightTs project and
         generate components.
     </Card>
     <Card title="Explore Features" icon="star">
         Learn about LightTs's features like JWT, Joi validation, and TypeORM in the
-        [Features](/features/) section.
+        [Features]({base}/features/) section.
     </Card>
     <Card title="Use the CLI" icon="seti:powershell">
         Discover how to use the `lts` CLI for generating components and adding features in the
-        [CLI](/cli/) section.
+        [CLI]({base}/cli/) section.
     </Card>
     <Card title="Contribute" icon="open-book">
         LightTs is open-source! Check out how to contribute on
