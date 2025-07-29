@@ -10,6 +10,10 @@ export default defineConfig({
     integrations: [
         starlight({
             title: 'LightTs',
+            logo: {
+                src: '/public/logo-text.png',
+                replacesTitle: true
+            },
             description: 'Official documentation for LightTs, a lightweight Node.js framework.',
             favicon: '/favicon.ico',
             social: [
@@ -39,7 +43,7 @@ export default defineConfig({
                 },
                 {
                     label: 'Example',
-                    items: ['examples/user-management']
+                    items: ['examples']
                 }
             ],
             plugins: [starlightThemeRapide()]
