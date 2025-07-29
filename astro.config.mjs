@@ -10,7 +10,8 @@ export default defineConfig({
         starlight({
             title: 'LightTs',
             logo: {
-                src: '/public/logo-text.png',
+                dark: '/public/logo-text/dark.png',
+                light: '/public/logo-text/light.png',
                 replacesTitle: true
             },
             description: 'Official documentation for LightTs, a lightweight Node.js framework.',
