@@ -2,11 +2,13 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightThemeRapide from 'starlight-theme-rapide';
+import partytown from '@astrojs/partytown';
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://lightts.dev',
     integrations: [
+        partytown(),
         starlight({
             title: 'LightTs',
             logo: {
@@ -20,12 +22,16 @@ export default defineConfig({
                 {
                     tag: 'script',
                     attrs: {
+                        type: 'text/partytown',
                         async: true,
                         src: 'https://www.googletagmanager.com/gtag/js?id=G-T55ML82CKG'
                     }
                 },
                 {
                     tag: 'script',
+                    attrs: {
+                        type: 'text/partytown'
+                    },
                     content: `
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
