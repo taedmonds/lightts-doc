@@ -16,6 +16,25 @@ export default defineConfig({
             },
             description: 'Official documentation for LightTs, a lightweight Node.js framework.',
             favicon: '/favicon.ico',
+            head: [
+                {
+                    tag: 'script',
+                    attrs: {
+                        async: true,
+                        src: 'https://www.googletagmanager.com/gtag/js?id=G-T55ML82CKG'
+                    }
+                },
+                {
+                    tag: 'script',
+                    content: `
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+
+                    gtag('config', 'G-T55ML82CKG');
+                   `
+                }
+            ],
             social: [
                 { icon: 'github', label: 'GitHub', href: 'https://github.com/taedmonds/lightts' }
             ],
